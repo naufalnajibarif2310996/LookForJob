@@ -9,7 +9,7 @@ Daftar Isi:
 - [Penggunaan](#Penggunaan)
 - [Kontribusi](#Kontribusi)
 - [Lisensi](#Lisensi)
-- [Detail .gitignore](#Detail.gitignore)
+- [Detail .gitignore](#Detail)
 
 ## Instalasi
 
@@ -72,7 +72,7 @@ Pastikan mengikuti standar PSR-12 dan menambahkan pengujian bila perlu.
 
 Proyek ini dilisensikan dengan Lisensi MIT. Silakan lihat file LICENSE untuk informasi selengkapnya.
 
-## Detail.gitignore
+## Detail
 
 Beberapa file diabaikan dalam git karena alasan keamanan atau dapat dihasilkan ulang:
 
