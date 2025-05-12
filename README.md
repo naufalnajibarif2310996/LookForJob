@@ -72,7 +72,7 @@ Pastikan mengikuti standar PSR-12 dan menambahkan pengujian bila perlu.
 
 Proyek ini dilisensikan dengan Lisensi MIT. Silakan lihat file LICENSE untuk informasi selengkapnya.
 
-## Detail
+## Detail .gitignore
 
 Beberapa file diabaikan dalam git karena alasan keamanan atau dapat dihasilkan ulang:
 
