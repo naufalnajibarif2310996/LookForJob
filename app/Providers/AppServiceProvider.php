@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Services\JobScraper;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -12,9 +11,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(JobScraper::class, function ($app) {
-            return new JobScraper();
-        });
+        // Tidak ada binding JobScraper karena class-nya tidak ada
     }
 
     /**
@@ -24,5 +21,4 @@ class AppServiceProvider extends ServiceProvider
     {
         //
     }
-
 }

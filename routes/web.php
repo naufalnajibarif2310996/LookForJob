@@ -1,18 +1,29 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\JobController;
-use App\Services\LinkedInService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\JobFrontendController;
 
-// Route untuk halaman utama
+use App\Http\Controllers\JobController;
+use App\Http\Controllers\JobFrontendController;
+use App\Http\Controllers\CVController;
+use App\Services\LinkedInService;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Di bawah ini adalah semua route untuk aplikasi Job & CV Helper.
+|
+*/
+
+// Route halaman utama
 Route::get('/', function () {
     return view('home');
 });
 
-// Route untuk dashboard (dengan middleware autentikasi)
+// Route dashboard (hanya untuk user yang sudah login dan terverifikasi)
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
@@ -23,12 +34,17 @@ Route::middleware([
     })->name('dashboard');
 });
 
-// Route untuk mendapatkan pekerjaan (dengan middleware autentikasi)
+// Route halaman daftar pekerjaan (frontend)
+Route::get('/jobs', [JobFrontendController::class, 'index']);
+
+// Route API - Ambil data pekerjaan (jika ada, tetap gunakan /api/jobs untuk API)
 Route::middleware(['auth'])->group(function () {
-    Route::get('/jobs', [JobController::class, 'getJobs']);
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
 });
 
-// Route untuk mendapatkan profil LinkedIn
+// Route API - Ambil profil LinkedIn
 Route::get('/api/linkedin-profile', function (Request $request, LinkedInService $linkedInService) {
     $request->validate([
         'username' => 'required|string',
@@ -37,13 +53,12 @@ Route::get('/api/linkedin-profile', function (Request $request, LinkedInService 
     try {
         $data = $linkedInService->getProfileTopPosition($request->input('username'));
 
-        // Format ulang data profil
         $headquarter = $data['data']['headquarter'] ?? [];
         $formattedData = [
             'name' => $data['data']['name'] ?? 'N/A',
             'position' => $data['data']['position'] ?? 'N/A',
             'company' => $data['data']['company'] ?? 'N/A',
-            'location' => $headquarter['city'] . ', ' . ($headquarter['country'] ?? 'N/A'),
+            'location' => ($headquarter['city'] ?? 'Unknown') . ', ' . ($headquarter['country'] ?? 'N/A'),
         ];
 
         return response()->json($formattedData);
@@ -53,7 +68,7 @@ Route::get('/api/linkedin-profile', function (Request $request, LinkedInService 
     }
 });
 
-// Route untuk mendapatkan pekerjaan dari LinkedIn
+// Route API - Ambil pekerjaan dari LinkedIn
 Route::get('/api/linkedin-jobs', function (Request $request, LinkedInService $linkedInService) {
     $request->validate([
         'keyword' => 'required|string',
@@ -63,7 +78,6 @@ Route::get('/api/linkedin-jobs', function (Request $request, LinkedInService $li
     try {
         $data = $linkedInService->getJobs($request->input('keyword'), $request->input('location'));
 
-        // Format ulang data pekerjaan
         $formattedJobs = collect($data['data']['jobs'] ?? [])->map(function ($job) {
             return [
                 'title' => $job['title'] ?? 'N/A',
@@ -81,7 +95,7 @@ Route::get('/api/linkedin-jobs', function (Request $request, LinkedInService $li
     }
 });
 
-// Route untuk mendapatkan pekerjaan dari API umum
+// Route API - Ambil pekerjaan dari API umum
 Route::get('/api/jobs', function (Request $request, LinkedInService $linkedInService) {
     $request->validate([
         'keyword' => 'required|string',
@@ -91,7 +105,6 @@ Route::get('/api/jobs', function (Request $request, LinkedInService $linkedInSer
     try {
         $data = $linkedInService->getJobs($request->input('keyword'), $request->input('location'));
 
-        // Format ulang data pekerjaan
         $formattedJobs = collect($data['jobs'] ?? [])->map(function ($job) {
             return [
                 'id' => $job['id'] ?? 'N/A',
@@ -113,5 +126,17 @@ Route::get('/api/jobs', function (Request $request, LinkedInService $linkedInSer
     }
 });
 
-// Route untuk halaman pekerjaan frontend
-Route::get('/jobs/frontend', [JobFrontendController::class, 'index']);
+// Route halaman CV
+Route::get('/cv', function () {
+    return view('cv');
+});
+
+// Route API - Generate CV dari input user
+Route::post('/api/generate-cv', [CVController::class, 'create']);
+
+// Route API - Simpan hasil edit CV
+Route::post('/api/save-cv', [CVController::class, 'save']);
+
+// Route preview dan save CV
+Route::get('/cv/preview', [CVController::class, 'preview'])->name('cv.preview');
+Route::post('/cv/save', [CVController::class, 'save'])->name('cv.save');
