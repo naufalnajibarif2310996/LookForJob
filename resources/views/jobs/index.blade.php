@@ -11,7 +11,7 @@
         <h1 class="mb-4">Job Listings</h1>
 
         <!-- Form untuk mencari pekerjaan -->
-        <form method="GET" action="{{ url('/jobs/frontend') }}" class="mb-4">
+        <form method="GET" action="{{ url('/jobs') }}" class="mb-4">
             <div class="row">
                 <div class="col-md-5">
                     <input type="text" name="keyword" class="form-control" placeholder="Keyword (e.g., developer)" value="{{ $keyword ?? '' }}">

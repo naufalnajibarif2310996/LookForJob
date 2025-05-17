@@ -13,17 +13,16 @@ class JobController extends Controller
         $request->validate([
             'keyword' => 'required|string|max:255',
             'location' => 'required|string|max:255',
-            'page' => 'integer|min:1',
-            'per_page' => 'integer|min:1|max:50',
         ]);
 
-        $keyword = $request->input('keyword');
-        $location = $request->input('location');
-        $page = $request->input('page', 1);
-        $perPage = $request->input('per_page', 10);
+        $keyword = $request->query('keyword');
+        $location = $request->query('location');
+        $page = $request->query('page', 1);
+        $perPage = $request->query('per_page', 10);
 
         try {
             $jobs = $scraper->scrapeIndeed($keyword, $location);
+
             $paginatedJobs = new LengthAwarePaginator(
                 array_slice($jobs, ($page - 1) * $perPage, $perPage),
                 count($jobs),
