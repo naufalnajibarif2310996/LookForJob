@@ -12,42 +12,34 @@
             display: flex;
             flex-direction: column;
         }
-
         body {
             background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
         }
-
         .main-content {
             flex: 1;
         }
-
         .navbar-brand {
             font-weight: bold;
             letter-spacing: 1px;
         }
-
         .hero-section {
             padding: 60px 0 40px 0;
         }
-
         .hero-title {
             font-size: 2.8rem;
             font-weight: 700;
             color: #2d3a4b;
         }
-
         .hero-lead {
             font-size: 1.3rem;
             color: #4b5563;
             margin-bottom: 30px;
         }
-
         .btn-main {
             font-size: 1.1rem;
             padding: 12px 32px;
             margin: 0 10px 10px 0;
         }
-
         footer {
             background: #1e293b;
         }
@@ -63,31 +55,41 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/jobs">Cari Lowongan</a>
+                        <a id="btn-jobs" href="{{ Auth::check() ? '/jobs' : '/login' }}" class="nav-link">Cari Lowongan</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/cv">Generate CV</a>
+                        <a id="btn-cv" href="{{ Auth::check() ? '/cv' : '/login' }}" class="nav-link">Generate CV</a>
                     </li>
+                    @auth
+                    <li class="nav-item">
+                        <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                            @csrf
+                            <button class="nav-link btn btn-link" type="submit" style="color:white;text-decoration:none;">Logout</button>
+                        </form>
+                    </li>
+                    @else
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                    @endauth
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Konten utama dibungkus dengan .main-content -->
     <div class="main-content">
         <section class="hero-section">
             <div class="container">
                 <div class="text-center">
                     <h1 class="hero-title mb-3">Selamat Datang di <span style="color:#6366f1">Look For Job</span></h1>
                     <p class="hero-lead">Temukan lowongan kerja impianmu dengan mudah dan buat CV profesional hanya dalam beberapa klik!</p>
-                    <a href="/jobs" class="btn btn-main btn-primary">Cari Lowongan</a>
-                    <a href="/cv" class="btn btn-main btn-outline-primary">Generate CV</a>
+                    <a id="btn-jobs" href="{{ Auth::check() ? '/jobs' : '/login' }}" class="btn btn-main btn-primary">Cari Lowongan</a>
+                    <a id="btn-cv" href="{{ Auth::check() ? '/cv' : '/login' }}" class="btn btn-main btn-outline-primary">Generate CV</a>
                 </div>
             </div>
         </section>
     </div>
 
-    <!-- Footer akan selalu berada di bawah -->
     <footer class="text-white text-center py-3">
         <p>&copy; 2025 Look For Job. All rights reserved.</p>
     </footer>

@@ -8,6 +8,7 @@ use App\Http\Controllers\JobController;
 use App\Http\Controllers\JobFrontendController;
 use App\Http\Controllers\CVController;
 use App\Services\LinkedInService;
+use App\Http\Controllers\auth\RegisteredUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,26 +24,8 @@ Route::get('/', function () {
     return view('home');
 });
 
-// Route dashboard (hanya untuk user yang sudah login dan terverifikasi)
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-});
-
 // Route halaman daftar pekerjaan (frontend)
 Route::get('/jobs', [JobFrontendController::class, 'index']);
-
-// Route API - Ambil data pekerjaan (jika ada, tetap gunakan /api/jobs untuk API)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-});
 
 // Route API - Ambil profil LinkedIn
 Route::get('/api/linkedin-profile', function (Request $request, LinkedInService $linkedInService) {
@@ -131,12 +114,9 @@ Route::get('/cv', function () {
     return view('cv');
 });
 
+Route::post('/register', [RegisteredUserController::class, 'store'])
+    ->middleware(['guest'])
+    ->name('register');
+
 // Route API - Generate CV dari input user
 Route::post('/api/generate-cv', [CVController::class, 'create']);
-
-// Route API - Simpan hasil edit CV
-Route::post('/api/save-cv', [CVController::class, 'save']);
-
-// Route preview dan save CV
-Route::get('/cv/preview', [CVController::class, 'preview'])->name('cv.preview');
-Route::post('/cv/save', [CVController::class, 'save'])->name('cv.save');

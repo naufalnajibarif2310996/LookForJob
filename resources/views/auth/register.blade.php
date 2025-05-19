@@ -1,9 +1,9 @@
 <x-guest-layout>
     <x-authentication-card>
         <x-slot name="logo">
-            <x-authentication-card-logo />
+            <h1 class="font-bold text-center mb-3" style="font-size:2.5rem">Look For Job</h1>
         </x-slot>
-
+        
         <x-validation-errors class="mb-4" />
 
         <form method="POST" action="{{ route('register') }}">
