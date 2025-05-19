@@ -9,6 +9,7 @@ use App\Http\Controllers\JobFrontendController;
 use App\Http\Controllers\CVController;
 use App\Services\LinkedInService;
 use App\Http\Controllers\auth\RegisteredUserController;
+use App\Http\Controllers\ProfileController; // Tambah untuk route profile
 
 /*
 |--------------------------------------------------------------------------
@@ -22,10 +23,25 @@ use App\Http\Controllers\auth\RegisteredUserController;
 // Route halaman utama
 Route::get('/', function () {
     return view('home');
+})->name('home');
+
+// Route halaman daftar pekerjaan (frontend, dengan pagination & pencarian)
+Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
+
+// Route halaman CV
+Route::get('/cv', function () {
+    return view('cv');
 });
 
-// Route halaman daftar pekerjaan (frontend)
-Route::get('/jobs', [JobFrontendController::class, 'index']);
+// Route register custom (override Jetstream/Fortify register)
+Route::post('/register', [RegisteredUserController::class, 'store'])
+    ->middleware(['guest'])
+    ->name('register');
+
+// Route halaman profile (hanya untuk user yang sudah login)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+});
 
 // Route API - Ambil profil LinkedIn
 Route::get('/api/linkedin-profile', function (Request $request, LinkedInService $linkedInService) {
@@ -108,15 +124,6 @@ Route::get('/api/jobs', function (Request $request, LinkedInService $linkedInSer
         return response()->json(['error' => $e->getMessage()], 500);
     }
 });
-
-// Route halaman CV
-Route::get('/cv', function () {
-    return view('cv');
-});
-
-Route::post('/register', [RegisteredUserController::class, 'store'])
-    ->middleware(['guest'])
-    ->name('register');
 
 // Route API - Generate CV dari input user
 Route::post('/api/generate-cv', [CVController::class, 'create']);

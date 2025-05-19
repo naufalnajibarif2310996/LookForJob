@@ -17,6 +17,49 @@
         <!-- Styles -->
         @livewireStyles
     </head>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const html = document.documentElement;
+        const themeToggle = document.getElementById('theme-toggle');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeLabel = document.getElementById('theme-toggle-label');
+
+        function setIcons() {
+            if (html.classList.contains('dark')) {
+                lightIcon.style.display = 'inline';
+                darkIcon.style.display = 'none';
+                themeLabel.innerText = 'Light';
+            } else {
+                lightIcon.style.display = 'none';
+                darkIcon.style.display = 'inline';
+                themeLabel.innerText = 'Dark';
+            }
+        }
+
+        if (
+            localStorage.theme === 'dark' ||
+            (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        ) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
+        setIcons();
+
+        themeToggle.addEventListener('click', function() {
+            html.classList.toggle('dark');
+            if (html.classList.contains('dark')) {
+                localStorage.theme = 'dark';
+            } else {
+                localStorage.theme = 'light';
+            }
+            setIcons();
+        });
+    });
+    </script>
+
     <body class="font-sans antialiased">
         <x-banner />
 

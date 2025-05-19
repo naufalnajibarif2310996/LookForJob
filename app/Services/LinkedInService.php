@@ -6,10 +6,12 @@ use Illuminate\Support\Facades\Log;
 
 class LinkedInService
 {
-    public function getJobs($keyword, $location)
+    public function getJobs($keyword, $location, $page = 1, $perPage = 10)
     {
         $url = 'https://jobs-search-api.p.rapidapi.com/getjobs';
-        Log::info('Fetching jobs from URL:', ['url' => $url]);
+
+        // Hitung offset (mulai dari data ke-berapa)
+        $offset = ($page - 1) * $perPage;
 
         $response = Http::withHeaders([
             'X-RapidAPI-Key' => env('RAPIDAPI_KEY'),
@@ -18,6 +20,9 @@ class LinkedInService
         ])->post($url, [
             'search_term' => $keyword,
             'location' => $location,
+            'results_wanted' => $perPage,
+            'offset' => $offset,
+            // tambahkan parameter lain sesuai kebutuhan, misal site_name, job_type, dst.
         ]);
 
         if ($response->failed()) {
@@ -27,8 +32,6 @@ class LinkedInService
             ]);
             throw new \Exception('Failed to fetch jobs from API. Status: ' . $response->status());
         }
-
-        Log::info('API Response:', ['data' => $response->json()]);
 
         return $response->json();
     }

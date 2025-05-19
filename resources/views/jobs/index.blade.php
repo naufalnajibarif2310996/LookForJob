@@ -4,64 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Listings</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="container mt-5">
-        <h1 class="mb-4">Job Listings</h1>
-
-        <!-- Form untuk mencari pekerjaan -->
-        <form method="GET" action="{{ url('/jobs') }}" class="mb-4">
-            <div class="row">
-                <div class="col-md-5">
-                    <input type="text" name="keyword" class="form-control" placeholder="Keyword (e.g., developer)" value="{{ $keyword ?? '' }}">
-                </div>
-                <div class="col-md-5">
-                    <input type="text" name="location" class="form-control" placeholder="Location (e.g., indonesia)" value="{{ $location ?? '' }}">
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Search</button>
-                </div>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-5xl mx-auto mt-10 p-4 bg-white shadow rounded">
+        <h1 class="text-2xl font-bold mb-4">Job Listings</h1>
+        <form method="GET" action="{{ url('/jobs') }}" class="mb-6">
+            <div class="flex flex-wrap gap-2">
+                <input type="text" name="keyword" class="flex-1 px-3 py-2 border border-gray-300 rounded" placeholder="Keyword (e.g., developer)" value="{{ $keyword ?? '' }}">
+                <input type="text" name="location" class="flex-1 px-3 py-2 border border-gray-300 rounded" placeholder="Location (e.g., indonesia)" value="{{ $location ?? '' }}">
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Search</button>
             </div>
         </form>
-
-        <!-- Tampilkan error jika ada -->
         @if (isset($error))
-            <div class="alert alert-danger">
+            <div class="mb-4 px-4 py-3 bg-red-100 border border-red-400 text-red-700 rounded">
                 {{ $error }}
             </div>
         @endif
-
-        <!-- Tampilkan daftar pekerjaan -->
         @if (!empty($jobs) && count($jobs) > 0)
-            <table class="table table-bordered">
+            <div class="overflow-x-auto">
+            <table class="min-w-full border border-gray-200 rounded">
                 <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Title</th>
-                        <th>Company</th>
-                        <th>Location</th>
-                        <th>Date Posted</th>
-                        <th>Details</th>
+                    <tr class="bg-gray-100">
+                        <th class="px-4 py-2 border">#</th>
+                        <th class="px-4 py-2 border">Title</th>
+                        <th class="px-4 py-2 border">Company</th>
+                        <th class="px-4 py-2 border">Location</th>
+                        <th class="px-4 py-2 border">Date Posted</th>
+                        <th class="px-4 py-2 border">Details</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($jobs as $index => $job)
+                    @foreach ($jobs as $job)
                         <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $job['title'] }}</td>
-                            <td>{{ $job['company'] }}</td>
-                            <td>{{ $job['location'] }}</td>
-                            <td>{{ $job['date_posted'] }}</td>
-                            <td>
-                                <a href="{{ $job['url'] }}" target="_blank" class="btn btn-sm btn-info">View</a>
+                            <td class="px-4 py-2 border">{{ ($jobs->currentPage() - 1) * $jobs->perPage() + $loop->iteration }}</td>
+                            <td class="px-4 py-2 border">{{ $job['title'] ?? '-' }}</td>
+                            <td class="px-4 py-2 border">{{ $job['company'] ?? '-' }}</td>
+                            <td class="px-4 py-2 border">{{ $job['location'] ?? '-' }}</td>
+                            <td class="px-4 py-2 border">{{ $job['date_posted'] ?? '-' }}</td>
+                            <td class="px-4 py-2 border">
+                                @if(!empty($job['job_url']))
+                                    <a href="{{ $job['job_url'] }}" target="_blank" class="inline-block px-3 py-1 text-xs text-white bg-blue-500 rounded hover:bg-blue-700">View</a>
+                                @else
+                                    <span class="text-gray-400">N/A</span>
+                                @endif
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
+            </div>
+            <div class="mt-6 flex justify-center">
+                {{ $jobs->withQueryString()->links('pagination::tailwind') }}
+            </div>
         @else
-            <p>No jobs found. Try searching with different keywords or location.</p>
+            @if ($searchPerformed)
+                <p class="text-gray-600">No jobs found. Try searching with different keywords or location.</p>
+            @else
+                <p class="text-gray-600">Masukkan keyword dan lokasi, lalu klik Search untuk melihat daftar pekerjaan.</p>
+            @endif
         @endif
     </div>
 </body>
