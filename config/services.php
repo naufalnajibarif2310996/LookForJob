@@ -14,6 +14,10 @@ return [
     |
     */
 
+    'jobapi' => [
+        'base_url' => env('JOB_API_BASE_URL', 'http://127.0.0.1:5000'),
+    ],
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],

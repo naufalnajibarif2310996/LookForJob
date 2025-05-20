@@ -27,6 +27,7 @@ Route::get('/', function () {
 
 // Route halaman daftar pekerjaan (frontend, dengan pagination & pencarian)
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
+Route::get('/jobs/detail', [JobController::class, 'showDetail'])->name('jobs.detail');
 
 // Route halaman CV
 Route::get('/cv', function () {

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
@@ -6,33 +7,66 @@ use Illuminate\Support\Facades\Log;
 
 class LinkedInService
 {
-    public function getJobs($keyword, $location, $page = 1, $perPage = 10)
+    protected $baseUrl;
+
+    public function __construct()
     {
-        $url = 'https://jobs-search-api.p.rapidapi.com/getjobs';
+        // Bisa ambil base_url dari env (bisa ganti-ganti tanpa ubah kode)
+        $this->baseUrl = config('services.jobapi.base_url', 'http://127.0.0.1:5000');
+    }
 
-        // Hitung offset (mulai dari data ke-berapa)
-        $offset = ($page - 1) * $perPage;
-
-        $response = Http::withHeaders([
-            'X-RapidAPI-Key' => env('RAPIDAPI_KEY'),
-            'X-RapidAPI-Host' => env('RAPIDAPI_HOST'),
-            'Content-Type' => 'application/json',
-        ])->post($url, [
-            'search_term' => $keyword,
-            'location' => $location,
-            'results_wanted' => $perPage,
-            'offset' => $offset,
-            // tambahkan parameter lain sesuai kebutuhan, misal site_name, job_type, dst.
-        ]);
-
-        if ($response->failed()) {
-            Log::error('API Error:', [
-                'status' => $response->status(),
-                'body' => $response->body(),
+    /**
+     * Ambil daftar pekerjaan dari API Flask.
+     * Hasil array tiap item minimal punya key 'judul' dan 'link'.
+     *
+     * @param string $keyword
+     * @param string $location
+     * @return array
+     * @throws \Exception
+     */
+    public function getJobs($keyword, $location)
+    {
+        try {
+            $response = Http::get($this->baseUrl . '/api/jobs', [
+                'q' => $keyword,
+                'l' => $location,
             ]);
-            throw new \Exception('Failed to fetch jobs from API. Status: ' . $response->status());
-        }
 
-        return $response->json();
+            if ($response->failed()) {
+                Log::error('API Flask Error:', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                throw new \Exception('Failed to fetch jobs from Flask API. Status: ' . $response->status());
+            }
+
+            $data = $response->json();
+
+            // Pastikan hasil array of jobs, dan tiap item minimal ada 'judul' dan 'link'
+            if (is_array($data)) {
+                return array_map(function ($item) {
+                    return [
+                        'judul' => $item['judul'] ?? '',
+                        'link' => $item['link'] ?? '',
+                        'perusahaan' => $item['perusahaan'] ?? '',
+                        'logo' => $item['logo'] ?? '',
+                        'lokasi' => $item['lokasi'] ?? '',
+                        'gaji' => $item['gaji'] ?? '',
+                        'dipost' => $item['dipost'] ?? '',
+                    ];
+                }, $data);
+            }
+
+            // Jika API mengembalikan error berbentuk array
+            if (isset($data['error'])) {
+                throw new \Exception($data['error']);
+            }
+
+            // Jika data tidak sesuai harapan
+            return [];
+        } catch (\Exception $e) {
+            Log::error('Exception in LinkedInService@getJobs: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }
